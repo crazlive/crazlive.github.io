@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🚀 Né Khối - Game 2D</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            min-height: 100vh;
+            background: #0b141c;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+            padding: 16px;
+            margin: 0;
+        }
+        .game-wrapper {
+            background: #1f313d;
+            padding: 24px 24px 16px;
+            border-radius: 48px 48px 32px 32px;
+            box-shadow: 0 20px 30px rgba(0,0,0,0.8), inset 0 2px 4px rgba(255,255,255,0.06);
+            max-width: 700px;
+            width: 100%;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            aspect-ratio: 600 / 400;
+            background: #18262e;
+            border-radius: 28px;
+            box-shadow: inset 0 0 0 2px #3a5a6b, 0 12px 18px rgba(0,0,0,0.6);
+            cursor: pointer;
+            touch-action: none;
+            margin-bottom: 12px;
+        }
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 6px 12px 6px;
+            color: #e3eef5;
+            text-shadow: 0 2px 3px rgba(0,0,0,0.6);
+            font-weight: 600;
+            flex-wrap: wrap;
+            gap: 8px 12px;
+        }
+        .score-box {
+            background: #142b36;
+            padding: 6px 20px 6px 18px;
+            border-radius: 60px;
+            font-size: 1.5rem;
+            box-shadow: inset 0 4px 6px rgba(0,0,0,0.5), 0 2px 0 #3f667a;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .score-box span {
+            color: #ffbe5c;
+            font-size: 2rem;
+            min-width: 2.8rem;
+            text-align: center;
+        }
+        .restart-btn {
+            background: #f28b4a;
+            border: none;
+            color: #161f26;
+            font-weight: bold;
+            font-size: 1.2rem;
+            padding: 8px 24px;
+            border-radius: 60px;
+            box-shadow: 0 6px 0 #a8652a, 0 4px 12px rgba(0,0,0,0.4);
+            transition: 0.08s linear;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: 0.3px;
+        }
+        .restart-btn:active {
+            transform: translateY(6px);
+            box-shadow: 0 1px 0 #7a4f1f;
+        }
+        .restart-btn:hover {
+            background: #f07c34;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 14px;
+            color: #8babbd;
+            font-size: 0.9rem;
+            border-top: 1px solid #3d5e6e;
+            padding-top: 14px;
+            font-weight: 300;
+            letter-spacing: 0.4px;
+        }
+        .footer strong {
+            color: #c7e2f0;
+            font-weight: 500;
+        }
+        .hint {
+            color: #b3cfdf;
+            font-size: 0.8rem;
+            background: #1e3643;
+            padding: 4px 18px;
+            border-radius: 40px;
+            box-shadow: inset 0 1px 4px #0b1a22;
+        }
+        @media (max-width: 500px) {
+            .game-wrapper { padding: 16px 14px 12px; }
+            .score-box { font-size: 1.2rem; padding: 4px 14px; }
+            .restart-btn { font-size: 1rem; padding: 6px 16px; }
+        }
+    </style>
+</head>
+<body>
+<div class="game-wrapper">
+    <div class="game-header">
+        <div class="score-box">
+            🏆 <span id="scoreDisplay">0</span>
+        </div>
+        <div class="hint">
+            ⬅️ ➡️ di chuyển
+        </div>
+        <button class="restart-btn" id="restartButton">⟳ Chơi lại</button>
+    </div>
+
+    <canvas id="gameCanvas" width="600" height="400"></canvas>
+
+    <div class="footer">
+        <strong>powered by... cuong24</strong>  ·  né khối  ·  v2.0
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ----- LẤY ELEMENTS -----
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreSpan = document.getElementById('scoreDisplay');
+
+        // ----- KÍCH THƯỚC CANVAS (logic) -----
+        const CW = 600, CH = 400;
+
+        // ----- BIẾN GAME -----
+        // Người chơi (thanh trượt)
+        const player = {
+            x: 280,
+            y: 360,
+            w: 70,
+            h: 18,
+            speed: 5.5,
+            color: '#6fcbff'
+        };
+
+        // Mảng các khối rơi
+        let blocks = [];
+        // Khung sinh khối
+        let spawnCounter = 0;
+        const SPAWN_RATE = 24; // số frame giữa các lần sinh (giảm = khối ra nhiều hơn)
+
+        // Điểm (thời gian sống sót)
+        let score = 0;
+        let frameCounter = 0;
+
+        // Trạng thái game
+        let gameActive = true;
+        let gameOverFlag = false; // dùng để hiển thị thông báo
+
+        // Phím bấm
+        const keys = {
+            ArrowLeft: false,
+            ArrowRight: false
+        };
+
+        // ----- HÀM KHỞI TẠO / RESET -----
+        function resetGame() {
+            // reset người chơi
+            player.x = 280;
+            player.y = 360;
+            // xóa hết khối
+            blocks = [];
+            // reset điểm
+            score = 0;
+            frameCounter = 0;
+            spawnCounter = 0;
+            gameActive = true;
+            gameOverFlag = false;
+            updateScore();
+            // giải phóng phím (tránh dính)
+            keys.ArrowLeft = false;
+            keys.ArrowRight = false;
+        }
+
+        // ----- CẬP NHẬT ĐIỂM HIỂN THỊ -----
+        function updateScore() {
+            scoreSpan.textContent = Math.floor(score);
+        }
+
+        // ----- SINH KHỐI MỚI -----
+        function spawnBlock() {
+            const w = 28 + Math.floor(Math.random() * 30); // 28~58
+            const h = 16 + Math.floor(Math.random() * 22); // 16~38
+            const x = Math.random() * (CW - w - 6) + 3;
+            const y = -h - 2; // bắt đầu từ trên cao
+            // tốc độ rơi tăng dần theo điểm (khó hơn)
+            const baseSpeed = 1.5 + Math.min(score / 80, 3.2);
+            const speedVariation = 0.5 + Math.random() * 0.9;
+            const speed = baseSpeed * (0.7 + speedVariation * 0.4);
+
+            blocks.push({
+                x: x,
+                y: y,
+                w: w,
+                h: h,
+                speed: Math.min(speed, 6.0),
+                color: `hsl(${Math.floor(Math.random() * 40 + 10)}, 70%, 55%)` // cam/đỏ/vàng
+            });
+        }
+
+        // ----- KIỂM TRA VA CHẠM (AABB) -----
+        function checkCollision(rect1, rect2) {
+            return rect1.x < rect2.x + rect2.w &&
+                   rect1.x + rect1.w > rect2.x &&
+                   rect1.y < rect2.y + rect2.h &&
+                   rect1.y + rect1.h > rect2.y;
+        }
+
+        // ----- CẬP NHẬT GAME (mỗi frame) -----
+        function update() {
+            if (!gameActive) return;
+
+            // 1. Di chuyển người chơi (trái/phải)
+            if (keys.ArrowLeft) {
+                player.x -= player.speed;
+            }
+            if (keys.ArrowRight) {
+                player.x += player.speed;
+            }
+            // Giới hạn trong canvas
+            if (player.x < 2) player.x = 2;
+            if (player.x + player.w > CW - 2) player.x = CW - player.w - 2;
+
+            // 2. Sinh khối
+            spawnCounter++;
+            if (spawnCounter >= SPAWN_RATE) {
+                spawnCounter = 0;
+                // sinh 1 hoặc 2 khối (ngẫu nhiên)
+                spawnBlock();
+                if (Math.random() < 0.35 && score > 15) {
+                    spawnBlock(); // sinh thêm khi điểm cao
+                }
+            }
+
+            // 3. Cập nhật vị trí các khối (rơi)
+            const playerRect = {
+                x: player.x,
+                y: player.y,
+                w: player.w,
+                h: player.h
+            };
+
+            for (let i = blocks.length - 1; i >= 0; i--) {
+                const b = blocks[i];
+                b.y += b.speed;
+
+                // Kiểm tra va chạm với người chơi
+                if (gameActive) {
+                    const blockRect = { x: b.x, y: b.y, w: b.w, h: b.h };
+                    if (checkCollision(playerRect, blockRect)) {
+                        // GAME OVER
+                        gameActive = false;
+                        gameOverFlag = true;
+                        // Không xóa khối, giữ nguyên để hiển thị
+                        // thoát vòng lặp (không cần update tiếp)
+                        return;
+                    }
+                }
+
+                // Xóa khối nếu ra khỏi màn hình (dưới đáy)
+                if (b.y > CH + 20) {
+                    blocks.splice(i, 1);
+                }
+            }
+
+            // 4. Tăng điểm (theo thời gian)
+            if (gameActive) {
+                frameCounter++;
+                if (frameCounter % 6 === 0) {
+                    score += 0.5;
+                    updateScore();
+                }
+            }
+        }
+
+        // ----- VẼ -----
+        function draw() {
+            ctx.clearRect(0, 0, CW, CH);
+
+            // ---- Nền gradient ----
+            const grad = ctx.createLinearGradient(0, 0, 0, CH);
+            grad.addColorStop(0, '#1b3140');
+            grad.addColorStop(0.7, '#0f1e28');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, CW, CH);
+
+            // ---- Vẽ các đường kẻ mờ (hiệu ứng) ----
+            ctx.strokeStyle = '#3b5d6b';
+            ctx.lineWidth = 0.5;
+            ctx.globalAlpha = 0.15;
+            for (let i = 0; i < CW; i += 35) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, CH);
+                ctx.stroke();
+            }
+            for (let i = 0; i < CH; i += 35) {
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(CW, i);
+                ctx.stroke();
+            }
+            ctx.globalAlpha = 1.0;
+
+            // ---- Vẽ các khối rơi ----
+            for (const b of blocks) {
+                // bóng đổ
+                ctx.shadowColor = '#00000055';
+                ctx.shadowBlur = 14;
+                // thân khối
+                ctx.fillStyle = b.color;
+                ctx.shadowColor = '#ffb34755';
+                ctx.shadowBlur = 10;
+                ctx.beginPath();
+                ctx.roundRect(b.x, b.y, b.w, b.h, 6);
+                ctx.fill();
+                // viền sáng
+                ctx.shadowBlur = 4;
+                ctx.strokeStyle = '#f0e6c0';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+                // hiệu ứng phản quang
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = '#ffffff30';
+                ctx.beginPath();
+                ctx.roundRect(b.x + 4, b.y + 3, b.w * 0.3, 5, 4);
+                ctx.fill();
+            }
+
+            // ---- Vẽ người chơi (thanh trượt) ----
+            const p = player;
+            // bóng
+            ctx.shadowColor = '#3aa0d0';
+            ctx.shadowBlur = 28;
+            // thân
+            const gradPlayer = ctx.createLinearGradient(p.x, p.y, p.x, p.y + p.h);
+            gradPlayer.addColorStop(0, '#a2e0ff');
+            gradPlayer.addColorStop(0.5, '#4cb5f0');
+            gradPlayer.addColorStop(1, '#1f7ba8');
+            ctx.fillStyle = gradPlayer;
+            ctx.shadowBlur = 22;
+            ctx.beginPath();
+            ctx.roundRect(p.x, p.y, p.w, p.h, 12);
+            ctx.fill();
+            // viền sáng
+            ctx.shadowBlur = 6;
+            ctx.strokeStyle = '#ddf0ff';
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+            // hai đèn nhỏ
+            ctx.shadowBlur = 10;
+            ctx.fillStyle = '#fffbe3';
+            ctx.beginPath();
+            ctx.arc(p.x + 12, p.y + p.h/2, 5, 0, 2*Math.PI);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(p.x + p.w - 12, p.y + p.h/2, 5, 0, 2*Math.PI);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            // ---- Vẽ thông báo Game Over ----
+            if (gameOverFlag) {
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = '#c03020';
+                ctx.font = 'bold 42px "Segoe UI", system-ui, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillStyle = '#fce8d0';
+                ctx.fillText('💥 GAME OVER', CW/2, 130);
+                ctx.font = 'bold 20px "Segoe UI"';
+                ctx.fillStyle = '#f5cba0';
+                ctx.fillText('Nhấn "Chơi lại" hoặc phím R', CW/2, 185);
+                ctx.shadowBlur = 0;
+            }
+
+            // ---- Điểm số hiển thị trên canvas (phụ) ----
+            ctx.font = 'bold 18px "Segoe UI", monospace';
+            ctx.fillStyle = '#b2d9e8';
+            ctx.globalAlpha = 0.5;
+            ctx.textAlign = 'right';
+            ctx.fillText(`⏱ ${Math.floor(score)}s`, CW-16, 34);
+            ctx.globalAlpha = 1;
+        }
+
+        // ----- VÒNG LẶP CHÍNH -----
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // ----- XỬ LÝ SỰ KIỆN BÀN PHÍM -----
+        function handleKeyDown(e) {
+            const key = e.key;
+            if (key === 'ArrowLeft' || key === 'ArrowRight') {
+                keys[key] = true;
+                e.preventDefault();
+            }
+            // Phím R để reset nhanh
+            if (key === 'r' || key === 'R') {
+                resetGame();
+                e.preventDefault();
+            }
+            // Phím Space để reset (tiện)
+            if (key === ' ' || key === 'Space') {
+                resetGame();
+                e.preventDefault();
+            }
+        }
+
+        function handleKeyUp(e) {
+            const key = e.key;
+            if (key === 'ArrowLeft' || key === 'ArrowRight') {
+                keys[key] = false;
+                e.preventDefault();
+            }
+        }
+
+        // ----- THÊM POLYFILL roundRect (nếu trình duyệt cũ) -----
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, radii) {
+                const r = typeof radii === 'number' ? radii : (radii || 0);
+                this.moveTo(x + r, y);
+                this.lineTo(x + w - r, y);
+                this.quadraticCurveTo(x + w, y, x + w, y + r);
+                this.lineTo(x + w, y + h - r);
+                this.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+                this.lineTo(x + r, y + h);
+                this.quadraticCurveTo(x, y + h, x, y + h - r);
+                this.lineTo(x, y + r);
+                this.quadraticCurveTo(x, y, x + r, y);
+                return this;
+            };
+        }
+
+        // ----- RESET BUTTON -----
+        document.getElementById('restartButton').addEventListener('click', function(e) {
+            resetGame();
+        });
+
+        // ----- ĐĂNG KÝ SỰ KIỆN -----
+        window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('keyup', handleKeyUp);
+        canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+        canvas.addEventListener('click', () => canvas.focus());
+        canvas.setAttribute('tabindex', '0');
+
+        // ----- KHỞI TẠO -----
+        resetGame();
+
+        // Bắt đầu game loop
+        gameLoop();
+
+        // Khi mất focus -> giải phóng phím
+        window.addEventListener('blur', () => {
+            keys.ArrowLeft = false;
+            keys.ArrowRight = false;
+        });
+
+        console.log('🚀 Game "Né Khối" - Powered by cuong24');
+    })();
+</script>
+</body>
+</html>
