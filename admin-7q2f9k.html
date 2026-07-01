@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<title>CodeHub Admin — Quản Trị Sản Phẩm</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f6fa;--surface:#fff;--text:#1a1a2e;--muted:#6b7280;--line:#e7e8f0;
+  --badge:#1fb6d8;--green:#33b26a;--green-dark:#279256;--red:#e15b5b;--paid:#f2a83c;
+  --radius:12px;--shadow:0 2px 10px rgba(24,20,60,.06);
+  font-family:'Inter',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);}
+h1,h2,h3{font-family:'Poppins',sans-serif;}
+button{font-family:inherit;cursor:pointer;border:none;}
+input,select,textarea{font-family:inherit;}
+.container{max-width:980px;margin:0 auto;padding:20px 16px 60px;}
+
+/* ---------- Gate screen ---------- */
+#gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+.gate-card{background:#fff;border-radius:18px;padding:36px 30px;max-width:380px;width:100%;box-shadow:0 12px 40px rgba(20,16,40,.12);text-align:center;}
+.gate-card .lock{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#1fb6d8,#8b5cf6);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:26px;color:#fff;}
+.gate-card h1{font-size:19px;margin-bottom:6px;}
+.gate-card p{font-size:13.5px;color:var(--muted);margin-bottom:20px;}
+.gate-card input{width:100%;padding:13px 14px;border-radius:10px;border:1.5px solid var(--line);font-size:15px;margin-bottom:12px;outline:none;}
+.gate-card input:focus{border-color:var(--badge);}
+.gate-card button{width:100%;padding:13px;border-radius:10px;background:var(--text);color:#fff;font-weight:700;font-size:14.5px;}
+.gate-card button:hover{background:#000;}
+.gate-err{color:var(--red);font-size:13px;margin-bottom:10px;min-height:16px;font-weight:600;}
+
+/* ---------- Top bar ---------- */
+#dash{display:none;}
+.topbar{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20;}
+.topbar-inner{max-width:980px;margin:0 auto;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.topbar .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-family:'Poppins',sans-serif;}
+.topbar .brand span.mark{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,#1fb6d8,#8b5cf6);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.topbar-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.btn{padding:10px 16px;border-radius:9px;font-weight:700;font-size:13.5px;display:inline-flex;align-items:center;gap:6px;}
+.btn-green{background:var(--green);color:#fff;}
+.btn-green:hover{background:var(--green-dark);}
+.btn-dark{background:var(--text);color:#fff;}
+.btn-dark:hover{background:#000;}
+.btn-ghost{background:var(--bg);color:var(--text);border:1.5px solid var(--line);}
+.btn-ghost:hover{background:#eceef5;}
+.btn-red{background:#fdeaea;color:var(--red);}
+.btn-red:hover{background:#fbdada;}
+.btn-sm{padding:7px 11px;font-size:12.5px;border-radius:7px;}
+
+/* ---------- Notice ---------- */
+.notice{background:#eaf6ee;border:1px solid #bfe6cc;color:#1c6b3c;border-radius:12px;padding:14px 16px;font-size:13px;line-height:1.6;margin:18px 0;}
+.notice b{color:#124a29;}
+.notice.warn{background:#fef6e8;border-color:#f4dfab;color:#7a5a12;}
+.notice.warn b{color:#5c4108;}
+
+/* ---------- Stats ---------- */
+.stats-row{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:20px 0;}
+@media(min-width:600px){.stats-row{grid-template-columns:repeat(4,1fr);}}
+.stat{background:#fff;border-radius:12px;padding:16px;box-shadow:var(--shadow);border:1px solid var(--line);}
+.stat .n{font-size:22px;font-weight:800;}
+.stat .l{font-size:12px;color:var(--muted);font-weight:600;margin-top:2px;}
+
+/* ---------- Toolbar / filter ---------- */
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:20px 0 12px;}
+.toolbar select, .toolbar input{padding:10px 12px;border-radius:9px;border:1.5px solid var(--line);font-size:13.5px;}
+.toolbar input{flex:1;min-width:160px;}
+
+/* ---------- Product list ---------- */
+.plist{display:flex;flex-direction:column;gap:10px;}
+.prow{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;gap:12px;align-items:center;box-shadow:var(--shadow);}
+.prow .ic{width:46px;height:46px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:21px;color:#fff;flex:none;}
+.g-source-free{background:linear-gradient(135deg,#1fb6d8,#0e7fa8);}
+.g-source-paid{background:linear-gradient(135deg,#8b5cf6,#5a32c9);}
+.g-tool{background:linear-gradient(135deg,#f2a83c,#e0722a);}
+.g-script{background:linear-gradient(135deg,#33b26a,#1c7a49);}
+.prow .info{flex:1;min-width:0;}
+.prow .info .t{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.prow .info .m{font-size:12px;color:var(--muted);margin-top:3px;display:flex;gap:8px;flex-wrap:wrap;}
+.prow .info .m .tag{background:var(--bg);padding:2px 8px;border-radius:20px;font-weight:700;}
+.prow .acts{display:flex;gap:6px;flex:none;}
+.empty{text-align:center;padding:50px 20px;color:var(--muted);}
+
+/* ---------- Form modal ---------- */
+.modal-overlay{position:fixed;inset:0;background:rgba(15,12,30,.55);z-index:80;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:.2s;}
+.modal-overlay.open{opacity:1;pointer-events:auto;}
+.modal{background:#fff;border-radius:16px;max-width:560px;width:100%;max-height:88vh;overflow-y:auto;}
+.modal-head{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;}
+.modal-head h3{font-size:16.5px;}
+.modal-body{padding:18px 20px;display:flex;flex-direction:column;gap:12px;}
+.field label{font-size:12.5px;font-weight:700;color:var(--muted);display:block;margin-bottom:5px;}
+.field input,.field select,.field textarea{width:100%;padding:11px 12px;border-radius:9px;border:1.5px solid var(--line);font-size:14px;outline:none;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--badge);}
+.field textarea{resize:vertical;min-height:70px;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.checkbox-row{display:flex;align-items:center;gap:8px;}
+.modal-foot{padding:16px 20px;border-top:1px solid var(--line);display:flex;gap:10px;}
+.modal-foot .btn{flex:1;justify-content:center;}
+.iconpick{display:flex;gap:8px;}
+.iconpick button{width:44px;height:44px;border-radius:9px;border:1.5px solid var(--line);font-size:19px;background:#fff;}
+.iconpick button.active{border-color:var(--text);background:var(--bg);}
+
+/* ---------- Data panel ---------- */
+.data-panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;margin-top:26px;}
+.data-panel h3{font-size:15px;margin-bottom:6px;}
+.data-panel p{font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.6;}
+.data-panel textarea{width:100%;min-height:120px;border:1.5px solid var(--line);border-radius:9px;padding:10px;font-size:12px;font-family:monospace;}
+.data-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#1a1a2e;color:#fff;padding:12px 20px;border-radius:30px;font-size:13.5px;font-weight:600;z-index:90;opacity:0;transition:.25s;pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,.25);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<!-- ============ PASSWORD GATE ============ -->
+<div id="gate">
+  <div class="gate-card">
+    <div class="lock">🔒</div>
+    <h1>Khu Vực Quản Trị</h1>
+    <p>Nhập mật khẩu quản trị để truy cập bảng điều khiển CodeHub.vn</p>
+    <div class="gate-err" id="gateErr"></div>
+    <input type="password" id="pwInput" placeholder="Mật khẩu quản trị" autocomplete="off">
+    <button id="pwSubmit">Đăng nhập</button>
+  </div>
+</div>
+
+<!-- ============ DASHBOARD ============ -->
+<div id="dash">
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand"><span class="mark">&lt;/&gt;</span> CodeHub Admin</div>
+      <div class="topbar-actions">
+        <button class="btn btn-green btn-sm" id="btnAdd">+ Thêm sản phẩm</button>
+        <button class="btn btn-ghost btn-sm" id="btnLogout">Đăng xuất</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="notice">
+      <b>Cách hoạt động:</b> Trang này không dùng database. Mọi thay đổi được lưu tạm trong trình duyệt (localStorage) để bạn xem trước ngay lập tức trên trang chủ. Khi hoàn tất, bấm <b>“Xuất file index.html”</b> bên dưới để tải file trang chủ đã cập nhật, rồi tải lên (upload) thay thế file cũ trên hosting — thay đổi sẽ hiển thị cho <b>mọi khách truy cập</b>.
+    </div>
+    <div class="notice warn">
+      <b>Bảo mật:</b> Trang quản trị này có tên file bí mật, không được liên kết ở bất kỳ đâu trên trang chủ. Hãy đổi mật khẩu mặc định (xem hướng dẫn HUONG_DAN_ADMIN.txt), và cân nhắc thêm bảo vệ ở cấp máy chủ (.htaccess / chặn IP) nếu triển khai thật.
+    </div>
+
+    <div class="stats-row" id="statsRow"></div>
+
+    <div class="toolbar">
+      <select id="filterCat">
+        <option value="all">Tất cả danh mục</option>
+        <option value="source-free">Source Code Miễn Phí</option>
+        <option value="source-paid">Source Code Có Phí</option>
+        <option value="tool">Tool / Phần Mềm</option>
+        <option value="script">Script</option>
+      </select>
+      <input type="text" id="filterSearch" placeholder="Tìm theo tên sản phẩm...">
+    </div>
+
+    <div class="plist" id="plist"></div>
+
+    <div class="data-panel">
+      <h3>📦 Xuất bản thay đổi (Publish)</h3>
+      <p>Bấm nút bên dưới để tải file <code>index.html</code> mới đã bao gồm toàn bộ thay đổi bạn vừa thực hiện. Tải file gốc <code>index.html</code> hiện tại lên cùng thư mục với trang quản trị này trước khi bấm để hệ thống tự động ghép dữ liệu.</p>
+      <div class="data-actions">
+        <button class="btn btn-dark btn-sm" id="btnExportSite">⬇ Xuất file index.html</button>
+        <button class="btn btn-ghost btn-sm" id="btnExportJson">⬇ Xuất products.json</button>
+        <button class="btn btn-ghost btn-sm" id="btnImportJson">⬆ Nhập JSON</button>
+        <button class="btn btn-red btn-sm" id="btnReset">Khôi phục mặc định</button>
+      </div>
+      <textarea id="jsonBox" placeholder="Dán nội dung JSON sản phẩm vào đây để nhập, hoặc xem dữ liệu hiện tại..." style="margin-top:10px;"></textarea>
+      <input type="file" id="jsonFile" accept=".json,.html" style="display:none;">
+    </div>
+  </div>
+</div>
+
+<!-- ============ ADD/EDIT MODAL ============ -->
+<div class="modal-overlay" id="formOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="formTitle">Thêm sản phẩm</h3>
+      <button class="btn btn-ghost btn-sm" id="formClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="f_id">
+      <div class="field">
+        <label>Icon</label>
+        <div class="iconpick" id="iconPick">
+          <button type="button" data-v="💻">💻</button>
+          <button type="button" data-v="💎">💎</button>
+          <button type="button" data-v="🛠️">🛠️</button>
+          <button type="button" data-v="⚙️">⚙️</button>
+          <button type="button" data-v="🚀">🚀</button>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Danh mục</label>
+          <select id="f_category">
+            <option value="source-free">Source Code Miễn Phí</option>
+            <option value="source-paid">Source Code Có Phí</option>
+            <option value="tool">Tool / Phần Mềm</option>
+            <option value="script">Script</option>
+          </select>
+        </div>
+        <div class="field"><label>Nhãn (tag hiển thị)</label><input id="f_tag" placeholder="VD: WEBSITE PHP"></div>
+      </div>
+      <div class="field"><label>Tiêu đề sản phẩm</label><input id="f_title" placeholder="Tên sản phẩm"></div>
+      <div class="field"><label>Mô tả</label><textarea id="f_description" placeholder="Mô tả chi tiết sản phẩm"></textarea></div>
+      <div class="field-row">
+        <div class="field"><label>Đánh giá (0–5)</label><input type="number" id="f_rating" min="0" max="5" step="0.1" value="4.5"></div>
+        <div class="field"><label>Lượt tải ban đầu</label><input type="number" id="f_downloads" min="0" value="0"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Giá (0 = miễn phí, VNĐ)</label><input type="number" id="f_price" min="0" value="0"></div>
+        <div class="field"><label>Ngôn ngữ / Công nghệ</label><input id="f_language" placeholder="VD: PHP, MySQL"></div>
+      </div>
+      <div class="field"><label>Link tải trực tiếp (để trống nếu chưa có)</label><input id="f_downloadUrl" placeholder="https://..."></div>
+      <div class="field"><label>Link demo (tùy chọn)</label><input id="f_demoUrl" placeholder="https://..."></div>
+      <div class="field"><label>Link liên hệ mua (Zalo / Telegram / mailto, cho sản phẩm có phí)</label><input id="f_contact" placeholder="https://zalo.me/..."></div>
+      <div class="checkbox-row"><input type="checkbox" id="f_featured"><label for="f_featured">Hiển thị ở banner đầu trang (nổi bật)</label></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" id="formCancel">Hủy</button>
+      <button class="btn btn-green" id="formSave">Lưu sản phẩm</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ CONFIG ============ */
+const ADMIN_HASH = "a095eee73acc8e2f99f156398a3b09d3c745c09cb64ac6cd90fd3a33209452db"; // sha256("CodeHub@2026") — đổi mật khẩu trong HUONG_DAN_ADMIN.txt
+const SESSION_KEY = "chub_admin_session";
+const CAT_LABEL = {'source-free':'Source Code Miễn Phí','source-paid':'Source Code Có Phí','tool':'Tool / Phần Mềm','script':'Script'};
+const CAT_CLASS = {'source-free':'g-source-free','source-paid':'g-source-paid','tool':'g-tool','script':'g-script'};
+
+/* ============ Password gate ============ */
+async function sha256(str){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+document.getElementById('pwSubmit').onclick = tryLogin;
+document.getElementById('pwInput').addEventListener('keydown', e=>{ if(e.key==='Enter') tryLogin(); });
+async function tryLogin(){
+  const val = document.getElementById('pwInput').value;
+  const hash = await sha256(val);
+  if(hash === ADMIN_HASH){
+    sessionStorage.setItem(SESSION_KEY,'1');
+    enterDashboard();
+  } else {
+    document.getElementById('gateErr').textContent = 'Sai mật khẩu. Vui lòng thử lại.';
+  }
+}
+if(sessionStorage.getItem(SESSION_KEY)==='1'){ enterDashboard(); }
+
+function enterDashboard(){
+  document.getElementById('gate').style.display='none';
+  document.getElementById('dash').style.display='block';
+  loadData();
+  renderAll();
+}
+document.getElementById('btnLogout').onclick = ()=>{
+  sessionStorage.removeItem(SESSION_KEY);
+  location.reload();
+};
+
+/* ============ Data ============ */
+let PRODUCTS = [];
+function loadData(){
+  const override = localStorage.getItem('chub_products');
+  if(override){ try{ PRODUCTS = JSON.parse(override); return; }catch(e){} }
+  // seed default (mirrors index.html defaults)
+  PRODUCTS = DEFAULT_PRODUCTS;
+}
+function saveData(){
+  localStorage.setItem('chub_products', JSON.stringify(PRODUCTS));
+  showToast('Đã lưu thay đổi ✓ (nhớ xuất file index.html để công bố)');
+}
+
+/* ============ Render ============ */
+function renderAll(){
+  renderStats();
+  renderList();
+}
+function renderStats(){
+  const total = PRODUCTS.length;
+  const free = PRODUCTS.filter(p=>p.price===0).length;
+  const paid = PRODUCTS.filter(p=>p.price>0).length;
+  const featured = PRODUCTS.filter(p=>p.featured).length;
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat"><div class="n">${total}</div><div class="l">Tổng sản phẩm</div></div>
+    <div class="stat"><div class="n">${free}</div><div class="l">Miễn phí</div></div>
+    <div class="stat"><div class="n">${paid}</div><div class="l">Có phí</div></div>
+    <div class="stat"><div class="n">${featured}</div><div class="l">Nổi bật (banner)</div></div>`;
+}
+function renderList(){
+  const cat = document.getElementById('filterCat').value;
+  const q = document.getElementById('filterSearch').value.trim().toLowerCase();
+  let items = PRODUCTS.filter(p => (cat==='all'||p.category===cat) && (!q || p.title.toLowerCase().includes(q)));
+  items = [...items].sort((a,b)=> new Date(b.dateAdded)-new Date(a.dateAdded));
+  const list = document.getElementById('plist');
+  if(!items.length){ list.innerHTML = `<div class="empty">Không có sản phẩm nào.</div>`; return; }
+  list.innerHTML = items.map(p=>`
+    <div class="prow">
+      <div class="ic ${CAT_CLASS[p.category]}">${p.icon}</div>
+      <div class="info">
+        <div class="t">${p.title}</div>
+        <div class="m">
+          <span class="tag">${CAT_LABEL[p.category]}</span>
+          <span>${p.price>0? p.price.toLocaleString('vi-VN')+'đ':'Miễn phí'}</span>
+          <span>★ ${p.rating}</span>
+          <span>⬇ ${p.downloads}</span>
+          ${p.featured?'<span class="tag">Nổi bật</span>':''}
+        </div>
+      </div>
+      <div class="acts">
+        <button class="btn btn-ghost btn-sm" onclick="editProduct(${p.id})">Sửa</button>
+        <button class="btn btn-red btn-sm" onclick="deleteProduct(${p.id})">Xóa</button>
+      </div>
+    </div>`).join('');
+}
+document.getElementById('filterCat').onchange = renderList;
+document.getElementById('filterSearch').oninput = renderList;
+
+/* ============ Add / Edit form ============ */
+const formOverlay = document.getElementById('formOverlay');
+let editingId = null, selectedIcon = '💻';
+
+document.getElementById('btnAdd').onclick = ()=> openForm(null);
+document.getElementById('formClose').onclick = closeForm;
+document.getElementById('formCancel').onclick = closeForm;
+formOverlay.addEventListener('click', e=>{ if(e.target===formOverlay) closeForm(); });
+
+document.getElementById('iconPick').addEventListener('click', e=>{
+  const btn = e.target.closest('button'); if(!btn) return;
+  selectedIcon = btn.dataset.v;
+  [...document.getElementById('iconPick').children].forEach(b=>b.classList.toggle('active', b===btn));
+});
+
+function openForm(id){
+  editingId = id;
+  const p = id ? PRODUCTS.find(x=>x.id===id) : null;
+  document.getElementById('formTitle').textContent = id? 'Sửa sản phẩm' : 'Thêm sản phẩm';
+  document.getElementById('f_category').value = p?.category || 'source-free';
+  document.getElementById('f_tag').value = p?.tag || '';
+  document.getElementById('f_title').value = p?.title || '';
+  document.getElementById('f_description').value = p?.description || '';
+  document.getElementById('f_rating').value = p?.rating ?? 4.5;
+  document.getElementById('f_downloads').value = p?.downloads ?? 0;
+  document.getElementById('f_price').value = p?.price ?? 0;
+  document.getElementById('f_language').value = p?.language || '';
+  document.getElementById('f_downloadUrl').value = p?.downloadUrl || '';
+  document.getElementById('f_demoUrl').value = p?.demoUrl || '';
+  document.getElementById('f_contact').value = p?.contact || '';
+  document.getElementById('f_featured').checked = !!p?.featured;
+  selectedIcon = p?.icon || '💻';
+  [...document.getElementById('iconPick').children].forEach(b=>b.classList.toggle('active', b.dataset.v===selectedIcon));
+  formOverlay.classList.add('open');
+}
+function closeForm(){ formOverlay.classList.remove('open'); }
+
+document.getElementById('formSave').onclick = ()=>{
+  const title = document.getElementById('f_title').value.trim();
+  if(!title){ alert('Vui lòng nhập tiêu đề sản phẩm.'); return; }
+  const data = {
+    category: document.getElementById('f_category').value,
+    tag: document.getElementById('f_tag').value.trim() || 'MỚI',
+    icon: selectedIcon,
+    title,
+    description: document.getElementById('f_description').value.trim(),
+    rating: parseFloat(document.getElementById('f_rating').value)||0,
+    downloads: parseInt(document.getElementById('f_downloads').value)||0,
+    price: parseInt(document.getElementById('f_price').value)||0,
+    language: document.getElementById('f_language').value.trim(),
+    downloadUrl: document.getElementById('f_downloadUrl').value.trim(),
+    demoUrl: document.getElementById('f_demoUrl').value.trim(),
+    contact: document.getElementById('f_contact').value.trim(),
+    featured: document.getElementById('f_featured').checked,
+    dateAdded: new Date().toISOString().slice(0,10)
+  };
+  if(editingId){
+    const idx = PRODUCTS.findIndex(x=>x.id===editingId);
+    PRODUCTS[idx] = {...PRODUCTS[idx], ...data};
+  } else {
+    const newId = PRODUCTS.length ? Math.max(...PRODUCTS.map(p=>p.id))+1 : 1;
+    PRODUCTS.push({id:newId, ...data});
+  }
+  saveData(); renderAll(); closeForm();
+};
+function editProduct(id){ openForm(id); }
+function deleteProduct(id){
+  if(!confirm('Xóa sản phẩm này? Hành động không thể hoàn tác.')) return;
+  PRODUCTS = PRODUCTS.filter(p=>p.id!==id);
+  saveData(); renderAll();
+}
+
+/* ============ Publish / export ============ */
+document.getElementById('btnExportJson').onclick = ()=>{
+  const blob = new Blob([JSON.stringify(PRODUCTS,null,2)], {type:'application/json'});
+  triggerDownload(blob, 'products.json');
+  showToast('Đã tải products.json ✓');
+};
+document.getElementById('btnImportJson').onclick = ()=> document.getElementById('jsonFile').click();
+document.getElementById('jsonFile').addEventListener('change', e=>{
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      let text = reader.result;
+      let json;
+      if(file.name.endsWith('.html')){
+        const m = text.match(/<script type="application\/json" id="products-data">([\s\S]*?)<\/script>/);
+        if(!m) throw new Error('Không tìm thấy khối dữ liệu trong file HTML.');
+        json = JSON.parse(m[1]);
+      } else {
+        json = JSON.parse(text);
+      }
+      PRODUCTS = json;
+      saveData(); renderAll();
+      showToast('Đã nhập dữ liệu thành công ✓');
+    }catch(err){ alert('Lỗi đọc file: '+err.message); }
+  };
+  reader.readAsText(file);
+});
+document.getElementById('btnReset').onclick = ()=>{
+  if(!confirm('Khôi phục toàn bộ về dữ liệu mặc định? Thay đổi hiện tại sẽ mất.')) return;
+  localStorage.removeItem('chub_products');
+  loadData(); renderAll();
+  showToast('Đã khôi phục dữ liệu mặc định');
+};
+
+document.getElementById('btnExportSite').onclick = async ()=>{
+  try{
+    const res = await fetch('index.html');
+    if(!res.ok) throw new Error('not found');
+    let html = await res.text();
+    const newJson = JSON.stringify(PRODUCTS, null, 2);
+    html = html.replace(
+      /(<script type="application\/json" id="products-data">)([\s\S]*?)(<\/script>)/,
+      `$1\n${newJson}\n$3`
+    );
+    const blob = new Blob([html], {type:'text/html'});
+    triggerDownload(blob, 'index.html');
+    showToast('Đã xuất index.html mới ✓ Hãy tải lên hosting để công bố.');
+  }catch(err){
+    document.getElementById('jsonBox').value = JSON.stringify(PRODUCTS,null,2);
+    showToast('Không thể tự động ghép file (cần chạy qua server). Đã hiển thị JSON để bạn dán thủ công.');
+  }
+};
+
+function triggerDownload(blob, filename){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+}
+
+let toastTimer;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+/* ============ Default seed (mirrors index.html) ============ */
+const DEFAULT_PRODUCTS = [
+  {"id":1,"category":"source-free","tag":"WEBSITE PHP","icon":"💻","title":"Mã Nguồn Website Bán Hàng PHP + MySQL","rating":4.8,"downloads":1240,"price":0,"language":"PHP, MySQL, Bootstrap","description":"Bộ mã nguồn website bán hàng đầy đủ giỏ hàng, quản trị đơn hàng, quản lý sản phẩm và thanh toán cơ bản.","downloadUrl":"","demoUrl":"","contact":"","featured":true,"dateAdded":"2026-06-28"},
+  {"id":2,"category":"source-free","tag":"APP ANDROID","icon":"💻","title":"Source Code App Quản Lý Chi Tiêu Android (Java)","rating":4.6,"downloads":860,"price":0,"language":"Java, Android Studio","description":"Ứng dụng quản lý chi tiêu cá nhân với biểu đồ thống kê, phân loại giao dịch và lưu trữ SQLite.","downloadUrl":"","demoUrl":"","contact":"","featured":false,"dateAdded":"2026-06-20"},
+  {"id":3,"category":"source-free","tag":"REACTJS","icon":"💻","title":"Source Code Trang Portfolio Cá Nhân ReactJS","rating":4.7,"downloads":2015,"price":0,"language":"React, TailwindCSS","description":"Template portfolio hiện đại dựng bằng React + Tailwind, tối ưu responsive, dễ tùy chỉnh.","downloadUrl":"","demoUrl":"","contact":"","featured":false,"dateAdded":"2026-06-15"},
+  {"id":4,"category":"source-free","tag":"DISCORD BOT","icon":"💻","title":"Source Code Discord Bot Quản Lý Server (Node.js)","rating":4.9,"downloads":530,"price":0,"language":"Node.js, discord.js","description":"Bot Discord hỗ trợ moderation, chào thành viên mới, lệnh tùy chỉnh.","downloadUrl":"","demoUrl":"","contact":"","featured":false,"dateAdded":"2026-05-30"},
+  {"id":5,"category":"source-paid","tag":"WEBSITE LARAVEL","icon":"💎","title":"Hệ Thống Quản Lý Nhà Hàng Laravel Pro","rating":4.9,"downloads":312,"price":590000,"language":"Laravel, MySQL, Vue","description":"Hệ thống quản lý nhà hàng toàn diện: order, bếp, kho, nhân sự, báo cáo doanh thu.","downloadUrl":"","demoUrl":"","contact":"https://zalo.me/0900000000","featured":true,"dateAdded":"2026-06-25"},
+  {"id":6,"category":"source-paid","tag":"APP FLUTTER","icon":"💎","title":"App Thương Mại Điện Tử Flutter Full UI/UX","rating":4.8,"downloads":274,"price":890000,"language":"Flutter, Firebase","description":"App thương mại điện tử đa nền tảng, tích hợp thanh toán, đánh giá sản phẩm.","downloadUrl":"","demoUrl":"","contact":"https://zalo.me/0900000000","featured":false,"dateAdded":"2026-06-10"},
+  {"id":7,"category":"source-paid","tag":"GAME UNITY","icon":"💎","title":"Game 2D Platformer Unity Full Source + Asset","rating":4.7,"downloads":190,"price":450000,"language":"Unity, C#","description":"Full source game platformer 2D kèm asset đồ họa, hệ thống level, save/load.","downloadUrl":"","demoUrl":"","contact":"https://zalo.me/0900000000","featured":false,"dateAdded":"2026-05-22"},
+  {"id":8,"category":"source-paid","tag":"CMS WORDPRESS","icon":"💎","title":"Plugin WordPress Đặt Lịch Hẹn Chuyên Nghiệp","rating":4.6,"downloads":402,"price":320000,"language":"WordPress, PHP","description":"Plugin đặt lịch hẹn cho spa, phòng khám, salon...","downloadUrl":"","demoUrl":"","contact":"https://zalo.me/0900000000","featured":false,"dateAdded":"2026-05-15"},
+  {"id":9,"category":"tool","tag":"AUTOMATION","icon":"🛠️","title":"Tool Auto Đăng Bài Facebook Hàng Loạt","rating":4.5,"downloads":980,"price":0,"language":"Windows, .NET","description":"Công cụ lên lịch và tự động đăng bài hàng loạt lên Fanpage/Group Facebook.","downloadUrl":"","demoUrl":"","contact":"","featured":true,"dateAdded":"2026-06-27"},
+  {"id":10,"category":"tool","tag":"DEV TOOL","icon":"🛠️","title":"Tool Nén & Tối Ưu Hình Ảnh Hàng Loạt (Windows)","rating":4.8,"downloads":1530,"price":0,"language":"Windows","description":"Nén hàng trăm ảnh cùng lúc, giữ chất lượng nhưng giảm dung lượng.","downloadUrl":"","demoUrl":"","contact":"","featured":false,"dateAdded":"2026-06-18"},
+  {"id":11,"category":"tool","tag":"SEO TOOL","icon":"🛠️","title":"Tool Kiểm Tra Backlink & Từ Khóa SEO","rating":4.4,"downloads":615,"price":150000,"language":"Windows, Web","description":"Kiểm tra vị trí từ khóa, phân tích backlink đối thủ.","downloadUrl":"","demoUrl":"","contact":"https://zalo.me/0900000000","featured":false,"dateAdded":"2026-05-28"},
+  {"id":12,"category":"tool","tag":"VIDEO TOOL","icon":"🛠️","title":"Tool Convert Video Hàng Loạt Không Giảm Chất Lượng","rating":4.7,"downloads":890,"price":0,"language":"Windows, FFmpeg","description":"Chuyển đổi định dạng video hàng loạt tốc độ cao.","downloadUrl":"","demoUrl":"","contact":"","featured":false,"dateAdded":"2026-05-12"},
+  {"id":13,"category":"script","tag":"PYTHON SCRIPT","icon":"⚙️","title":"Script Python Tự Động Hoá Excel Báo Cáo","rating":4.9,"downloads":720,"price":0,"language":"Python, openpyxl","description":"Script tự động tổng hợp dữ liệu từ nhiều file Excel, tạo báo cáo.","downloadUrl":"","demoUrl":"","contact":"","featured":true,"dateAdded":"2026-06-29"},
+  {"id":14,"category":"script","tag":"BASH SCRIPT","icon":"⚙️","title":"Script Bash Auto Deploy Server Ubuntu","rating":4.6,"downloads":340,"price":0,"language":"Bash, Ubuntu","description":"Script tự động cài đặt môi trường, pull code, build và restart service.","downloadUrl":"","demoUrl":"","contact":"","featured":false,"dateAdded":"2026-06-05"},
+  {"id":15,"category":"script","tag":"JS SCRIPT","icon":"⚙️","title":"Script Tampermonkey Tự Động Điểm Danh Web","rating":4.3,"downloads":505,"price":50000,"language":"JavaScript, Tampermonkey","description":"Userscript tự động điểm danh, giữ phiên đăng nhập.","downloadUrl":"","demoUrl":"","contact":"https://zalo.me/0900000000","featured":false,"dateAdded":"2026-05-20"},
+  {"id":16,"category":"script","tag":"POWERSHELL","icon":"⚙️","title":"Script PowerShell Sao Lưu Dữ Liệu Tự Động","rating":4.7,"downloads":260,"price":0,"language":"PowerShell, Windows","description":"Tự động sao lưu thư mục quan trọng theo lịch, nén và đặt tên file backup.","downloadUrl":"","demoUrl":"","contact":"","featured":false,"dateAdded":"2026-05-08"}
+];
+</script>
+</body>
+</html>

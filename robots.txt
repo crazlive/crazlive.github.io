@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /admin-7q2f9k.html
+Disallow: /HUONG_DAN_ADMIN.txt
+Allow: /
