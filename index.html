@@ -1,214 +1,634 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DevShare - Source Code & Tools</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-        
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background-color: #f5f6f8; color: #333; }
-        
-        /* HEADER */
-        header { background: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 18px; color: #2c3e50; text-transform: uppercase; letter-spacing: 0.5px;}
-        .logo span { color: #5dbb47; }
-        .header-actions { display: flex; align-items: center; gap: 15px; }
-        .search-btn { background: #5dbb47; color: white; border: none; width: 35px; height: 35px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; }
-        .menu-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: #333; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="index, follow">
+<title>CodeHub.vn — Chia Sẻ Source Code, Tool & Script</title>
+<meta name="description" content="Kho chia sẻ mã nguồn (source code), tool và script miễn phí & có phí cho lập trình viên Việt Nam.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============ Design tokens ============ */
+:root{
+  --bg:#f5f6fa;
+  --surface:#ffffff;
+  --text:#1a1a2e;
+  --muted:#6b7280;
+  --line:#e7e8f0;
+  --badge:#1fb6d8;
+  --badge-2:#8b5cf6;
+  --green:#33b26a;
+  --green-dark:#279256;
+  --footer-bg:#211c3f;
+  --footer-text:#c9c5e0;
+  --paid:#f2a83c;
+  --free:#33b26a;
+  --radius:14px;
+  --shadow:0 2px 10px rgba(24,20,60,.06);
+  --shadow-lg:0 12px 32px rgba(24,20,60,.16);
+  font-family:'Inter',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;padding-bottom:40px;}
+h1,h2,h3,.brand,.hero-title{font-family:'Poppins',sans-serif;}
+img,svg{display:block;}
+a{color:inherit;text-decoration:none;}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+.container{max-width:1180px;margin:0 auto;padding:0 16px;}
+.hide{display:none !important;}
+::selection{background:var(--badge);color:#fff;}
 
-        /* HERO SLIDER */
-        .hero { padding: 15px; }
-        .hero-card { background: #2c3e50; border-radius: 16px; overflow: hidden; position: relative; color: white; min-height: 200px; display: flex; flex-direction: column; justify-content: flex-end; padding: 20px; background-size: cover; background-position: center; }
-        .hero-badge { background: #00d2d3; color: #fff; padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; display: inline-block; width: max-content; margin-bottom: 8px; text-transform: uppercase;}
-        .hero-title { font-size: 18px; font-weight: 700; margin-bottom: 10px; line-height: 1.3; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-        .hero-stats { display: flex; gap: 15px; font-size: 12px; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
-        .hero-stats span { display: flex; align-items: center; gap: 4px; }
-        .dots { display: flex; justify-content: center; gap: 6px; margin-top: 10px; }
-        .dot { width: 8px; height: 8px; background: #ddd; border-radius: 50%; }
-        .dot.active { background: #00d2d3; }
+/* ============ Header ============ */
+header.site-header{
+  background:#fff;border-bottom:1px solid var(--line);
+  position:sticky;top:0;z-index:40;
+}
+.header-inner{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;max-width:1180px;margin:0 auto;}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;letter-spacing:.2px;}
+.brand-mark{
+  width:40px;height:40px;border-radius:10px;
+  background:linear-gradient(135deg,#1fb6d8,#8b5cf6);
+  display:flex;align-items:center;justify-content:center;color:#fff;font-size:19px;font-weight:800;flex:none;
+}
+.brand small{display:block;font-family:'Inter',sans-serif;font-weight:600;font-size:11px;color:var(--muted);letter-spacing:.5px;}
+.header-actions{display:flex;align-items:center;gap:10px;}
+.icon-btn{
+  width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:var(--bg);transition:.15s;
+}
+.icon-btn.green{background:var(--green);color:#fff;}
+.icon-btn:hover{filter:brightness(0.95);}
+.icon-btn:active{transform:scale(.93);}
 
-        /* MAIN CONTENT */
-        main { padding: 0 15px 30px; }
-        .section-header { display: flex; justify-content: space-between; align-items: center; margin: 25px 0 15px; }
-        .section-title { font-size: 16px; font-weight: 700; color: #444; }
-        .view-all { font-size: 12px; color: #5dbb47; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 4px; }
-        
-        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        
-        /* PRODUCT CARD */
-        .card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; flex-direction: column; cursor: pointer; transition: transform 0.2s;}
-        .card:hover { transform: translateY(-2px); }
-        .card-img-wrapper { position: relative; padding-top: 60%; background: #eee; }
-        .card-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
-        .card-badge-top { position: absolute; top: 8px; left: 8px; background: #00d2d3; color: white; font-size: 9px; font-weight: 700; padding: 3px 8px; border-radius: 12px; z-index: 2; text-transform: uppercase;}
-        .card-badge-bottom { position: absolute; bottom: 8px; left: 8px; border: 1px solid #f1c40f; color: #f1c40f; background: rgba(0,0,0,0.6); font-size: 10px; font-weight: 700; padding: 2px 6px; z-index: 2; text-transform: uppercase; font-family: monospace;}
-        
-        .card-content { padding: 10px; display: flex; flex-direction: column; flex-grow: 1; justify-content: space-between; }
-        .card-title { font-size: 12px; font-weight: 600; color: #333; margin-bottom: 10px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .card-footer { display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 600; color: #666; }
-        .card-footer span { display: flex; align-items: center; gap: 4px; }
-        .star-icon { color: #f1c40f; }
-        .download-icon { color: #d35400; }
+/* desktop inline nav */
+.desktop-nav{display:none;gap:22px;font-weight:600;font-size:14.5px;}
+.desktop-nav a{color:var(--text);opacity:.8;padding:8px 2px;border-bottom:2px solid transparent;}
+.desktop-nav a:hover{opacity:1;border-color:var(--badge);}
+@media(min-width:900px){
+  .desktop-nav{display:flex;}
+  .hamburger-btn{display:none;}
+}
 
-        /* FAB */
-        .fab { position: fixed; bottom: 20px; right: 20px; background: #5dbb47; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px; cursor: pointer; box-shadow: 0 4px 10px rgba(93,187,71,0.4); border: none; }
+/* ============ Search bar ============ */
+.search-bar{
+  display:none;background:#fff;border-bottom:1px solid var(--line);
+  padding:12px 16px;
+}
+.search-bar.open{display:block;}
+.search-bar .row{max-width:1180px;margin:0 auto;display:flex;gap:8px;}
+.search-bar input{
+  flex:1;padding:12px 14px;border-radius:10px;border:1.5px solid var(--line);font-size:15px;outline:none;
+}
+.search-bar input:focus{border-color:var(--badge);}
+.search-bar button.close-search{padding:0 14px;font-weight:700;color:var(--muted);}
 
-        /* ADMIN PANEL (HIDDEN BY DEFAULT) */
-        #adminPanel { display: none; background: #fff; border-top: 3px solid #e74c3c; padding: 20px; margin-top: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .btn { padding: 8px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px; }
-        .btn-red { background: #e74c3c; color: white; }
-        .btn-green { background: #2ecc71; color: white; }
-        textarea { width: 100%; height: 150px; font-family: monospace; font-size: 12px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; margin-top: 10px;}
+/* ============ Drawer menu ============ */
+.overlay{
+  position:fixed;inset:0;background:rgba(20,16,40,.45);z-index:60;opacity:0;pointer-events:none;transition:.2s;
+}
+.overlay.open{opacity:1;pointer-events:auto;}
+.drawer{
+  position:fixed;top:0;right:0;height:100%;width:min(320px,84vw);background:#fff;z-index:61;
+  transform:translateX(100%);transition:.25s ease;display:flex;flex-direction:column;
+}
+.drawer.open{transform:translateX(0);}
+.drawer-head{display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid var(--line);}
+.drawer nav{display:flex;flex-direction:column;overflow-y:auto;}
+.drawer nav a{padding:16px;border-bottom:1px solid var(--line);font-weight:600;display:flex;align-items:center;justify-content:space-between;}
+.drawer nav a:active{background:var(--bg);}
+.drawer nav a .tag{font-size:11px;background:var(--bg);color:var(--muted);padding:3px 8px;border-radius:20px;font-weight:700;}
 
-        /* FOOTER */
-        footer { text-align: center; padding: 20px; font-size: 11px; color: #888; background: #fff; margin-top: 20px; }
+/* ============ Hero carousel ============ */
+.hero-wrap{padding:16px 16px 0;max-width:1180px;margin:0 auto;}
+.hero{position:relative;border-radius:18px;overflow:hidden;box-shadow:var(--shadow-lg);}
+.hero-track{display:flex;transition:transform .45s cubic-bezier(.65,0,.35,1);}
+.hero-slide{
+  min-width:100%;aspect-ratio:16/9.5;position:relative;display:flex;align-items:flex-end;
+  color:#fff;padding:26px 22px;
+}
+@media(min-width:640px){.hero-slide{aspect-ratio:16/6.2;padding:34px 40px;}}
+.hero-slide::before{content:"";position:absolute;inset:0;z-index:0;}
+.hero-slide::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,.72) 10%,rgba(0,0,0,.15) 55%,rgba(0,0,0,0) 80%);z-index:1;}
+.hero-slide .hs-content{position:relative;z-index:2;max-width:640px;}
+.hero-slide .badge{display:inline-block;background:var(--badge);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:800;letter-spacing:.4px;margin-bottom:10px;}
+.hero-title{font-size:22px;font-weight:800;line-height:1.25;margin-bottom:10px;}
+@media(min-width:640px){.hero-title{font-size:30px;}}
+.hero-meta{display:flex;gap:16px;font-size:13.5px;font-weight:600;opacity:.95;}
+.hero-meta span{display:flex;align-items:center;gap:5px;}
+.hero-dots{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);z-index:3;display:flex;gap:7px;}
+.hero-dots button{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.5);transition:.2s;}
+.hero-dots button.active{background:#fff;width:22px;border-radius:5px;}
+.hero-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:3;width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,.35);color:#fff;display:flex;align-items:center;justify-content:center;}
+.hero-arrow.left{left:10px;}.hero-arrow.right{right:10px;}
+.hero-arrow:hover{background:rgba(0,0,0,.55);}
 
-        /* RESPONSIVE DESKTOP */
-        @media (min-width: 768px) {
-            .grid { grid-template-columns: repeat(4, 1fr); gap: 20px; }
-            .hero-card { min-height: 350px; padding: 40px; }
-            .hero-title { font-size: 32px; }
-            main { max-width: 1200px; margin: 0 auto; }
-            .card-title { font-size: 14px; }
-        }
-    </style>
+/* ============ Sections & grid ============ */
+.section{max-width:1180px;margin:0 auto;padding:30px 16px 6px;}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.section-head h2{font-size:20px;font-weight:800;}
+.section-head .see-more{color:var(--green);font-weight:700;font-size:14.5px;display:flex;align-items:center;gap:5px;}
+.section-head .see-more:hover{color:var(--green-dark);}
+.divider{height:1px;background:var(--line);margin-bottom:18px;}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(min-width:640px){.grid{grid-template-columns:repeat(3,1fr);}}
+@media(min-width:960px){.grid{grid-template-columns:repeat(4,1fr);}}
+
+.card{
+  background:var(--surface);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);
+  display:flex;flex-direction:column;transition:.18s;cursor:pointer;border:1px solid var(--line);
+}
+.card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);}
+.card-thumb{
+  position:relative;aspect-ratio:16/11;display:flex;align-items:center;justify-content:center;font-size:40px;color:#fff;
+}
+.card-thumb .tag{
+  position:absolute;top:8px;left:8px;background:rgba(0,0,0,.55);backdrop-filter:blur(2px);
+  color:#fff;font-size:10.5px;font-weight:800;padding:5px 9px;border-radius:20px;letter-spacing:.2px;
+  max-width:calc(100% - 16px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.card-thumb .price-pill{
+  position:absolute;top:8px;right:8px;font-size:10.5px;font-weight:800;padding:5px 9px;border-radius:20px;color:#fff;
+}
+.card-body{padding:11px 12px 13px;flex:1;display:flex;flex-direction:column;gap:8px;}
+.card-title{font-size:14px;font-weight:700;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:38px;}
+.card-stats{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;color:var(--muted);font-weight:600;margin-top:auto;}
+.card-stats .stars{color:#f5a623;display:flex;align-items:center;gap:4px;}
+.card-stats .dls{display:flex;align-items:center;gap:4px;}
+
+/* thumb gradient variants */
+.g-source-free{background:linear-gradient(135deg,#1fb6d8,#0e7fa8);}
+.g-source-paid{background:linear-gradient(135deg,#8b5cf6,#5a32c9);}
+.g-tool{background:linear-gradient(135deg,#f2a83c,#e0722a);}
+.g-script{background:linear-gradient(135deg,#33b26a,#1c7a49);}
+
+/* ============ Category filter chips (view-all mode) ============ */
+.chip-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:16px;}
+.chip{flex:none;padding:9px 16px;border-radius:24px;background:#fff;border:1.5px solid var(--line);font-weight:700;font-size:13px;color:var(--muted);}
+.chip.active{background:var(--text);color:#fff;border-color:var(--text);}
+.back-link{display:inline-flex;align-items:center;gap:6px;font-weight:700;color:var(--muted);margin-bottom:10px;font-size:14px;}
+.back-link:hover{color:var(--text);}
+.empty-state{text-align:center;padding:60px 20px;color:var(--muted);}
+.empty-state .em{font-size:44px;margin-bottom:10px;}
+
+/* ============ Modal ============ */
+.modal-overlay{position:fixed;inset:0;background:rgba(15,12,30,.55);z-index:80;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:.2s;}
+.modal-overlay.open{opacity:1;pointer-events:auto;}
+@media(min-width:640px){.modal-overlay{align-items:center;}}
+.modal{
+  background:#fff;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;
+  border-radius:20px 20px 0 0;transform:translateY(30px);transition:.25s;
+}
+@media(min-width:640px){.modal{border-radius:18px;}}
+.modal-overlay.open .modal{transform:translateY(0);}
+.modal-thumb{aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;font-size:64px;color:#fff;position:relative;}
+.modal-close{position:absolute;top:12px;right:12px;width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.4);color:#fff;display:flex;align-items:center;justify-content:center;}
+.modal-body{padding:20px;}
+.modal-badge{display:inline-block;font-size:11px;font-weight:800;padding:5px 10px;border-radius:20px;color:#fff;margin-bottom:10px;}
+.modal-title{font-size:19px;font-weight:800;margin-bottom:8px;line-height:1.3;}
+.modal-stats{display:flex;gap:16px;font-size:13.5px;color:var(--muted);font-weight:600;margin-bottom:14px;}
+.modal-stats .stars{color:#f5a623;}
+.modal-desc{font-size:14px;line-height:1.65;color:#42405a;margin-bottom:16px;}
+.modal-meta-row{display:flex;justify-content:space-between;padding:10px 0;border-top:1px solid var(--line);font-size:13.5px;}
+.modal-meta-row span:first-child{color:var(--muted);font-weight:600;}
+.modal-meta-row span:last-child{font-weight:700;}
+.modal-actions{display:flex;gap:10px;margin-top:18px;}
+.btn{flex:1;padding:14px;border-radius:12px;font-weight:800;font-size:14.5px;text-align:center;display:flex;align-items:center;justify-content:center;gap:7px;transition:.15s;}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:var(--green);color:#fff;}
+.btn-primary:hover{background:var(--green-dark);}
+.btn-secondary{background:var(--bg);color:var(--text);border:1.5px solid var(--line);}
+.btn-secondary:hover{background:#eceef5;}
+
+/* ============ Footer ============ */
+footer{background:var(--footer-bg);color:var(--footer-text);margin-top:50px;padding:38px 16px 90px;}
+.footer-inner{max-width:760px;margin:0 auto;text-align:center;}
+.footer-inner h3{font-size:14px;letter-spacing:1.5px;font-weight:700;color:#9d97c9;margin-bottom:20px;}
+.footer-inner p{font-size:13.5px;line-height:1.85;margin-bottom:16px;color:#c9c5e0;}
+.footer-inner p b{color:#fff;}
+.footer-line{height:1px;background:#3a3468;width:56px;margin:0 auto 22px;}
+.footer-copy{font-size:12.5px;color:#877fb2;margin-top:20px;}
+.footer-copy a{text-decoration:underline;opacity:.85;}
+
+/* ============ Scroll to top ============ */
+.totop{
+  position:fixed;bottom:22px;right:18px;width:46px;height:46px;border-radius:50%;background:var(--green);
+  color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(51,178,106,.4);
+  z-index:30;opacity:0;pointer-events:none;transition:.2s;
+}
+.totop.show{opacity:1;pointer-events:auto;}
+.totop:active{transform:scale(.9);}
+
+/* toast */
+.toast{
+  position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:#1a1a2e;color:#fff;
+  padding:12px 20px;border-radius:30px;font-size:13.5px;font-weight:600;z-index:90;opacity:0;transition:.25s;pointer-events:none;
+  box-shadow:0 8px 24px rgba(0,0,0,.25);white-space:nowrap;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+.skeleton{display:flex;align-items:center;justify-content:center;padding:60px 0;color:var(--muted);}
+</style>
 </head>
 <body>
 
-    <header>
-        <div class="logo">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="#5dbb47"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
-            <div>DEV<span>SHARE</span></div>
-        </div>
-        <div class="header-actions">
-            <button class="search-btn">🔍</button>
-            <button class="menu-btn">☰</button>
-        </div>
-    </header>
-
-    <div class="hero">
-        <!-- Hero rendered by JS -->
-        <div id="heroContainer"></div>
-        <div class="dots">
-            <div class="dot active"></div>
-            <div class="dot"></div>
-            <div class="dot"></div>
-            <div class="dot"></div>
-        </div>
+<!-- ============ HEADER ============ -->
+<header class="site-header">
+  <div class="header-inner">
+    <a href="#" class="brand" onclick="goHome();return false;">
+      <span class="brand-mark">&lt;/&gt;</span>
+      <span>CodeHub<small>chia sẻ source&nbsp;·&nbsp;tool&nbsp;·&nbsp;script</small></span>
+    </a>
+    <nav class="desktop-nav">
+      <a href="#" onclick="goHome();return false;">Trang chủ</a>
+      <a href="#" onclick="showCategory('source-free');return false;">Source Free</a>
+      <a href="#" onclick="showCategory('source-paid');return false;">Source Có Phí</a>
+      <a href="#" onclick="showCategory('tool');return false;">Tool</a>
+      <a href="#" onclick="showCategory('script');return false;">Script</a>
+    </nav>
+    <div class="header-actions">
+      <button class="icon-btn green" id="searchToggle" aria-label="Tìm kiếm" title="Tìm kiếm">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2.2"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+      <button class="icon-btn hamburger-btn" id="menuToggle" aria-label="Menu" title="Menu">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"/></svg>
+      </button>
     </div>
+  </div>
+</header>
 
-    <main id="mainContent">
-        <!-- Categories rendered by JS -->
-    </main>
+<!-- ============ SEARCH BAR ============ -->
+<div class="search-bar" id="searchBar">
+  <div class="row">
+    <input type="text" id="searchInput" placeholder="Tìm source code, tool, script...">
+    <button class="close-search" id="searchClose">Đóng</button>
+  </div>
+</div>
 
-    <button class="fab" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">↑</button>
+<!-- ============ DRAWER MENU ============ -->
+<div class="overlay" id="drawerOverlay"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-head">
+    <span class="brand" style="font-size:17px;">
+      <span class="brand-mark" style="width:32px;height:32px;font-size:15px;">&lt;/&gt;</span>CodeHub
+    </span>
+    <button class="icon-btn" id="drawerClose">
+      <svg width="18" height="18" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <nav>
+    <a href="#" onclick="goHome();closeDrawer();return false;">Trang chủ</a>
+    <a href="#" onclick="showCategory('source-free');closeDrawer();return false;">Source Code Miễn Phí <span class="tag">FREE</span></a>
+    <a href="#" onclick="showCategory('source-paid');closeDrawer();return false;">Source Code Có Phí <span class="tag">PRO</span></a>
+    <a href="#" onclick="showCategory('tool');closeDrawer();return false;">Tool / Phần Mềm <span class="tag">TOOL</span></a>
+    <a href="#" onclick="showCategory('script');closeDrawer();return false;">Script <span class="tag">SCRIPT</span></a>
+    <a href="#" onclick="showCategory('all');closeDrawer();return false;">Tất cả sản phẩm</a>
+  </nav>
+</div>
 
-    <!-- ADMIN BACKDOOR PANEL -->
-    <div id="adminPanel" style="display: none; max-width: 1200px; margin: 20px auto;">
-        <div class="admin-header">
-            <h3 style="color: #e74c3c;">🔥 Chế Độ Quản Trị Ẩn</h3>
-            <button class="btn btn-green" onclick="generateSaveData()">1. Cập nhật mã Data</button>
-        </div>
-        <p style="font-size: 12px; margin-bottom: 10px;">Thay đổi nội dung text bên dưới hoặc copy mã JSON vừa tạo dán đè vào file <b>data.js</b> của bạn để lưu vĩnh viễn.</p>
-        <textarea id="adminDataOut"></textarea>
+<!-- ============ MAIN APP ROOT ============ -->
+<main id="app"></main>
+
+<!-- ============ MODAL ============ -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modalBox"></div>
+</div>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="footer-inner">
+    <h3>THÔNG BÁO PHÁP LÝ &amp; DISCLAIMER</h3>
+    <p><b>CodeHub.vn</b> là nền tảng cộng đồng độc lập, chia sẻ mã nguồn (source code), tool và script do các thành viên tự phát triển, đóng gói hoặc tổng hợp — không đại diện hay liên kết chính thức với bất kỳ hãng phần mềm nào.</p>
+    <p>Toàn bộ source code, tool, script đăng tải thuộc quyền sở hữu của tác giả tương ứng. CodeHub.vn chỉ đóng vai trò trung gian giới thiệu, không chỉnh sửa hay xác nhận chất lượng nội dung gốc.</p>
+    <p>Đối với sản phẩm <b>có phí</b>, vui lòng liên hệ trực tiếp qua thông tin được cung cấp để được hỗ trợ thanh toán và nhận link tải chính thức.</p>
+    <p>Website <b>không lưu trữ hay phân phối</b> phần mềm crack, mã độc hoặc mã nguồn vi phạm bản quyền của bên thứ ba. Mọi nội dung vi phạm sẽ được gỡ bỏ ngay khi nhận được khiếu nại hợp lệ từ chủ sở hữu.</p>
+    <p><b>Mọi rủi ro khi tải và sử dụng</b> thuộc về người dùng. CodeHub.vn không chịu trách nhiệm về thiệt hại phát sinh (lỗi bảo mật, mất dữ liệu, xung đột hệ thống...) trong quá trình sử dụng mã nguồn, tool hoặc script được chia sẻ.</p>
+    <div class="footer-line"></div>
+    <div class="footer-copy">© 2026 CodeHub.vn — All Rights Reserved.<br><a href="mailto:dmca@codehub.vn">DMCA / Báo vi phạm bản quyền</a></div>
+  </div>
+</footer>
+
+<button class="totop" id="toTop" title="Lên đầu trang">
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+</button>
+
+<div class="toast" id="toast"></div>
+
+<!-- ============ PRODUCT DATA (edit via /admin panel) ============ -->
+<script type="application/json" id="products-data">
+[
+  {"id":1,"category":"source-free","tag":"WEBSITE PHP","icon":"💻","title":"Mã Nguồn Website Bán Hàng PHP + MySQL","rating":4.8,"downloads":1240,"price":0,"language":"PHP, MySQL, Bootstrap","description":"Bộ mã nguồn website bán hàng đầy đủ giỏ hàng, quản trị đơn hàng, quản lý sản phẩm và thanh toán cơ bản. Phù hợp học tập và tùy biến cho dự án thực tế.","downloadUrl":"","demoUrl":"","contact":"","featured":true,"dateAdded":"2026-06-28"},
+  {"id":2,"category":"source-free","tag":"APP ANDROID","icon":"💻","title":"Source Code App Quản Lý Chi Tiêu Android (Java)","rating":4.6,"downloads":860,"price":0,"language":"Java, Android Studio","description":"Ứng dụng quản lý chi tiêu cá nhân với biểu đồ thống kê, phân loại giao dịch và lưu trữ SQLite. Code sạch, có chú thích chi tiết.","downloadUrl":"","demoUrl":"","contact":"","featured":false,"dateAdded":"2026-06-20"},
+  {"id":3,"category":"source-free","tag":"REACTJS","icon":"💻","title":"Source Code Trang Portfolio Cá Nhân ReactJS","rating":4.7,"downloads":2015,"price":0,"language":"React, TailwindCSS","description":"Template portfolio hiện đại dựng bằng React + Tailwind, tối ưu responsive, hiệu ứng chuyển động mượt, dễ dàng tùy chỉnh nội dung.","downloadUrl":"","demoUrl":"","contact":"","featured":false,"dateAdded":"2026-06-15"},
+  {"id":4,"category":"source-free","tag":"DISCORD BOT","icon":"💻","title":"Source Code Discord Bot Quản Lý Server (Node.js)","rating":4.9,"downloads":530,"price":0,"language":"Node.js, discord.js","description":"Bot Discord hỗ trợ moderation, chào thành viên mới, lệnh tùy chỉnh và hệ thống cảnh báo vi phạm. Dễ deploy trên Railway/Render.","downloadUrl":"","demoUrl":"","contact":"","featured":false,"dateAdded":"2026-05-30"},
+  {"id":5,"category":"source-paid","tag":"WEBSITE LARAVEL","icon":"💎","title":"Hệ Thống Quản Lý Nhà Hàng Laravel Pro","rating":4.9,"downloads":312,"price":590000,"language":"Laravel, MySQL, Vue","description":"Hệ thống quản lý nhà hàng toàn diện: order, bếp, kho, nhân sự, báo cáo doanh thu theo thời gian thực. Tài liệu cài đặt chi tiết kèm hỗ trợ.","downloadUrl":"","demoUrl":"","contact":"https://zalo.me/0900000000","featured":true,"dateAdded":"2026-06-25"},
+  {"id":6,"category":"source-paid","tag":"APP FLUTTER","icon":"💎","title":"App Thương Mại Điện Tử Flutter Full UI/UX","rating":4.8,"downloads":274,"price":890000,"language":"Flutter, Firebase","description":"App thương mại điện tử đa nền tảng, tích hợp thanh toán, đánh giá sản phẩm, chat hỗ trợ và bảng quản trị admin riêng.","downloadUrl":"","demoUrl":"","contact":"https://zalo.me/0900000000","featured":false,"dateAdded":"2026-06-10"},
+  {"id":7,"category":"source-paid","tag":"GAME UNITY","icon":"💎","title":"Game 2D Platformer Unity Full Source + Asset","rating":4.7,"downloads":190,"price":450000,"language":"Unity, C#","description":"Full source game platformer 2D kèm asset đồ họa, hệ thống level, save/load, âm thanh và hướng dẫn build APK/EXE.","downloadUrl":"","demoUrl":"","contact":"https://zalo.me/0900000000","featured":false,"dateAdded":"2026-05-22"},
+  {"id":8,"category":"source-paid","tag":"CMS WORDPRESS","icon":"💎","title":"Plugin WordPress Đặt Lịch Hẹn Chuyên Nghiệp","rating":4.6,"downloads":402,"price":320000,"language":"WordPress, PHP","description":"Plugin đặt lịch hẹn cho spa, phòng khám, salon... Giao diện đặt lịch trực quan, quản lý khung giờ, gửi email xác nhận tự động.","downloadUrl":"","demoUrl":"","contact":"https://zalo.me/0900000000","featured":false,"dateAdded":"2026-05-15"},
+  {"id":9,"category":"tool","tag":"AUTOMATION","icon":"🛠️","title":"Tool Auto Đăng Bài Facebook Hàng Loạt","rating":4.5,"downloads":980,"price":0,"language":"Windows, .NET","description":"Công cụ lên lịch và tự động đăng bài hàng loạt lên Fanpage/Group Facebook, hỗ trợ đa tài khoản và xoay nội dung tự động.","downloadUrl":"","demoUrl":"","contact":"","featured":true,"dateAdded":"2026-06-27"},
+  {"id":10,"category":"tool","tag":"DEV TOOL","icon":"🛠️","title":"Tool Nén & Tối Ưu Hình Ảnh Hàng Loạt (Windows)","rating":4.8,"downloads":1530,"price":0,"language":"Windows","description":"Nén hàng trăm ảnh cùng lúc, hỗ trợ JPG/PNG/WebP, giữ chất lượng hiển thị nhưng giảm dung lượng tới 70%.","downloadUrl":"","demoUrl":"","contact":"","featured":false,"dateAdded":"2026-06-18"},
+  {"id":11,"category":"tool","tag":"SEO TOOL","icon":"🛠️","title":"Tool Kiểm Tra Backlink & Từ Khóa SEO","rating":4.4,"downloads":615,"price":150000,"language":"Windows, Web","description":"Kiểm tra vị trí từ khóa, phân tích backlink đối thủ và xuất báo cáo SEO nhanh chóng, hỗ trợ nhiều công cụ tìm kiếm.","downloadUrl":"","demoUrl":"","contact":"https://zalo.me/0900000000","featured":false,"dateAdded":"2026-05-28"},
+  {"id":12,"category":"tool","tag":"VIDEO TOOL","icon":"🛠️","title":"Tool Convert Video Hàng Loạt Không Giảm Chất Lượng","rating":4.7,"downloads":890,"price":0,"language":"Windows, FFmpeg","description":"Chuyển đổi định dạng video hàng loạt (MP4, MKV, AVI...) tốc độ cao, tận dụng GPU tăng tốc, giao diện đơn giản dễ dùng.","downloadUrl":"","demoUrl":"","contact":"","featured":false,"dateAdded":"2026-05-12"},
+  {"id":13,"category":"script","tag":"PYTHON SCRIPT","icon":"⚙️","title":"Script Python Tự Động Hoá Excel Báo Cáo","rating":4.9,"downloads":720,"price":0,"language":"Python, openpyxl","description":"Script tự động tổng hợp dữ liệu từ nhiều file Excel, tạo báo cáo tổng hợp và biểu đồ chỉ với một lệnh chạy.","downloadUrl":"","demoUrl":"","contact":"","featured":true,"dateAdded":"2026-06-29"},
+  {"id":14,"category":"script","tag":"BASH SCRIPT","icon":"⚙️","title":"Script Bash Auto Deploy Server Ubuntu","rating":4.6,"downloads":340,"price":0,"language":"Bash, Ubuntu","description":"Script tự động cài đặt môi trường, pull code, build và restart service trên server Ubuntu chỉ với một dòng lệnh.","downloadUrl":"","demoUrl":"","contact":"","featured":false,"dateAdded":"2026-06-05"},
+  {"id":15,"category":"script","tag":"JS SCRIPT","icon":"⚙️","title":"Script Tampermonkey Tự Động Điểm Danh Web","rating":4.3,"downloads":505,"price":50000,"language":"JavaScript, Tampermonkey","description":"Userscript tự động điểm danh, giữ phiên đăng nhập và gửi thông báo khi hoàn tất trên các nền tảng học trực tuyến.","downloadUrl":"","demoUrl":"","contact":"https://zalo.me/0900000000","featured":false,"dateAdded":"2026-05-20"},
+  {"id":16,"category":"script","tag":"POWERSHELL","icon":"⚙️","title":"Script PowerShell Sao Lưu Dữ Liệu Tự Động","rating":4.7,"downloads":260,"price":0,"language":"PowerShell, Windows","description":"Tự động sao lưu thư mục quan trọng theo lịch, nén và đặt tên file backup theo ngày giờ, gửi log qua email.","downloadUrl":"","demoUrl":"","contact":"","featured":false,"dateAdded":"2026-05-08"}
+]
+</script>
+
+<script>
+/* =========================================================
+   CodeHub.vn — app logic
+   Data source: #products-data JSON block above (edit via /admin)
+   Local overrides: localStorage 'chub_products' (written by admin panel)
+   ========================================================= */
+const CAT_LABEL = {
+  'source-free':'Source Code Miễn Phí',
+  'source-paid':'Source Code Có Phí',
+  'tool':'Tool / Phần Mềm',
+  'script':'Script',
+  'all':'Tất Cả Sản Phẩm'
+};
+const CAT_CLASS = {'source-free':'g-source-free','source-paid':'g-source-paid','tool':'g-tool','script':'g-script'};
+
+function loadProducts(){
+  const override = localStorage.getItem('chub_products');
+  if(override){
+    try{ return JSON.parse(override); }catch(e){ /* fall through */ }
+  }
+  return JSON.parse(document.getElementById('products-data').textContent);
+}
+function getDownloadCounts(){
+  try{ return JSON.parse(localStorage.getItem('chub_dl_counts')||'{}'); }catch(e){ return {}; }
+}
+function bumpDownload(id){
+  const counts = getDownloadCounts();
+  counts[id] = (counts[id]||0)+1;
+  localStorage.setItem('chub_dl_counts', JSON.stringify(counts));
+}
+function effectiveDownloads(p){
+  const counts = getDownloadCounts();
+  return p.downloads + (counts[p.id]||0);
+}
+
+let PRODUCTS = loadProducts();
+let state = { view:'home', category:'all', query:'' };
+let heroIndex = 0, heroTimer = null;
+
+function fmtPrice(p){
+  return p.price>0 ? p.price.toLocaleString('vi-VN')+'đ' : 'MIỄN PHÍ';
+}
+function stars(r){
+  return '<span class="stars">★ '+r.toFixed(1)+'</span>';
+}
+function dlIcon(n){
+  return '<span class="dls">⬇ '+ (n>=1000? (n/1000).toFixed(1).replace('.0','')+'k' : n) +'</span>';
+}
+
+function cardHTML(p){
+  const cls = CAT_CLASS[p.category];
+  return `<div class="card" onclick="openModal(${p.id})">
+    <div class="card-thumb ${cls}">
+      <span class="tag">${p.tag}</span>
+      <span class="price-pill" style="background:${p.price>0?'var(--paid)':'var(--free)'}">${p.price>0?'CÓ PHÍ':'FREE'}</span>
+      <span>${p.icon}</span>
     </div>
+    <div class="card-body">
+      <div class="card-title">${p.title}</div>
+      <div class="card-stats">${stars(p.rating)}${dlIcon(effectiveDownloads(p))}</div>
+    </div>
+  </div>`;
+}
 
-    <footer>
-        © 2026 DevShare - Nền tảng chia sẻ Source Code, Script, Tool hàng đầu.<br>
-        Mọi source code đều được kiểm duyệt. Điều khoản sử dụng & Chính sách bảo mật.
-    </footer>
+/* ---------- HOME VIEW ---------- */
+function renderHome(){
+  const featured = PRODUCTS.filter(p=>p.featured);
+  const heroSlides = (featured.length? featured : PRODUCTS.slice(0,4));
+  const latest = [...PRODUCTS].sort((a,b)=> new Date(b.dateAdded)-new Date(a.dateAdded)).slice(0,8);
 
-    <!-- Load Data -->
-    <script src="data.js"></script>
-    
-    <!-- Render Logic -->
-    <script>
-        // Render Hero
-        function renderHero() {
-            const heroData = siteData.hero[0]; // Chỉ lấy item đầu tiên làm demo
-            const container = document.getElementById('heroContainer');
-            container.innerHTML = `
-                <div class="hero-card" style="background-image: linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0.1)), url('${heroData.image}')">
-                    <div>
-                        <div class="hero-badge">${heroData.badge}</div>
-                        <h2 class="hero-title">${heroData.title}</h2>
-                        <div class="hero-stats">
-                            <span><span style="color:#f1c40f">★</span> ${heroData.stars}</span>
-                            <span>📥 ${heroData.downloads}</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
+  let html = `
+  <div class="hero-wrap">
+    <div class="hero" id="hero">
+      <div class="hero-track" id="heroTrack">
+        ${heroSlides.map(p=>`
+          <div class="hero-slide ${CAT_CLASS[p.category]}" onclick="openModal(${p.id})">
+            <div class="hs-content">
+              <span class="badge">${p.tag}</span>
+              <div class="hero-title">${p.title}</div>
+              <div class="hero-meta">${stars(p.rating)}${dlIcon(effectiveDownloads(p))}<span>${fmtPrice(p)}</span></div>
+            </div>
+          </div>`).join('')}
+      </div>
+      <button class="hero-arrow left" onclick="event.stopPropagation();heroMove(-1)">‹</button>
+      <button class="hero-arrow right" onclick="event.stopPropagation();heroMove(1)">›</button>
+      <div class="hero-dots" id="heroDots">
+        ${heroSlides.map((_,i)=>`<button class="${i===0?'active':''}" onclick="event.stopPropagation();heroGo(${i})"></button>`).join('')}
+      </div>
+    </div>
+  </div>
 
-        // Render Categories and Cards
-        function renderContent() {
-            const main = document.getElementById('mainContent');
-            let html = '';
-            
-            siteData.categories.forEach(category => {
-                html += `
-                    <div class="section-header">
-                        <h3 class="section-title">${category.title}</h3>
-                        <a href="#" class="view-all">Xem thêm →</a>
-                    </div>
-                    <div class="grid">
-                `;
+  <section class="section">
+    <div class="section-head"><h2>Mới Nhất</h2><a class="see-more" href="#" onclick="showCategory('all');return false;">Xem thêm →</a></div>
+    <div class="divider"></div>
+    <div class="grid">${latest.map(cardHTML).join('')}</div>
+  </section>
+  `;
 
-                category.items.forEach(item => {
-                    html += `
-                        <div class="card">
-                            <div class="card-img-wrapper">
-                                <img src="${item.img}" class="card-img" alt="${item.title}">
-                                <div class="card-badge-top">${item.badge}</div>
-                                <div class="card-badge-bottom">${item.type}</div>
-                            </div>
-                            <div class="card-content">
-                                <div class="card-title">${item.title}</div>
-                                <div class="card-footer">
-                                    <span><span class="star-icon">★</span> ${item.stars}</span>
-                                    <span><span class="download-icon">📥</span> ${item.views}</span>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
+  ['source-free','source-paid','tool','script'].forEach(cat=>{
+    const items = PRODUCTS.filter(p=>p.category===cat).slice(0,4);
+    if(!items.length) return;
+    html += `
+    <section class="section">
+      <div class="section-head"><h2>${CAT_LABEL[cat]}</h2><a class="see-more" href="#" onclick="showCategory('${cat}');return false;">Xem thêm →</a></div>
+      <div class="divider"></div>
+      <div class="grid">${items.map(cardHTML).join('')}</div>
+    </section>`;
+  });
 
-                html += `</div>`;
-            });
-            main.innerHTML = html;
-        }
+  document.getElementById('app').innerHTML = html;
+  startHeroAutoplay(heroSlides.length);
+}
 
-        // Admin Backdoor Logic
-        function checkAdmin() {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('admin') === '1') {
-                document.getElementById('adminPanel').style.display = 'block';
-                document.getElementById('adminDataOut').value = "let siteData = " + JSON.stringify(siteData, null, 4) + ";";
-            }
-        }
+function heroGo(i){
+  heroIndex = i;
+  const track = document.getElementById('heroTrack');
+  if(track) track.style.transform = `translateX(-${i*100}%)`;
+  document.querySelectorAll('#heroDots button').forEach((d,idx)=>d.classList.toggle('active', idx===i));
+}
+function heroMove(dir){
+  const dots = document.querySelectorAll('#heroDots button');
+  if(!dots.length) return;
+  let n = (heroIndex + dir + dots.length) % dots.length;
+  heroGo(n);
+  resetHeroAutoplay(dots.length);
+}
+function startHeroAutoplay(count){
+  clearInterval(heroTimer);
+  if(count<=1) return;
+  heroTimer = setInterval(()=>{ heroMove(1); }, 4500);
+}
+function resetHeroAutoplay(count){ startHeroAutoplay(count); }
 
-        function generateSaveData() {
-            // Trong thực tế, bạn có thể build form để thay đổi biến siteData.
-            // Ở đây xuất thẳng json hiện tại ra text để dễ copy.
-            const textOut = "let siteData = " + JSON.stringify(siteData, null, 4) + ";";
-            document.getElementById('adminDataOut').value = textOut;
-            alert("Đã tạo mã mới! Hãy copy đoạn mã dưới dán đè vào file data.js của bạn để lưu lại thay đổi.");
-        }
+/* ---------- CATEGORY / ALL VIEW ---------- */
+function showCategory(cat){
+  state = { view:'category', category:cat, query:'' };
+  window.scrollTo({top:0,behavior:'smooth'});
+  render();
+}
+function renderCategory(){
+  const cat = state.category;
+  const items = cat==='all' ? [...PRODUCTS].sort((a,b)=> new Date(b.dateAdded)-new Date(a.dateAdded)) : PRODUCTS.filter(p=>p.category===cat);
+  const chips = ['all','source-free','source-paid','tool','script'];
+  let html = `
+  <section class="section">
+    <a class="back-link" href="#" onclick="goHome();return false;">← Trang chủ</a>
+    <div class="section-head"><h2>${CAT_LABEL[cat]}</h2></div>
+    <div class="chip-row">
+      ${chips.map(c=>`<button class="chip ${c===cat?'active':''}" onclick="showCategory('${c}')">${CAT_LABEL[c]}</button>`).join('')}
+    </div>
+    ${items.length ? `<div class="grid">${items.map(cardHTML).join('')}</div>` :
+      `<div class="empty-state"><div class="em">🗂️</div>Chưa có sản phẩm nào trong mục này.</div>`}
+  </section>`;
+  document.getElementById('app').innerHTML = html;
+}
 
-        // Khởi tạo
-        window.onload = () => {
-            if(typeof siteData !== 'undefined') {
-                renderHero();
-                renderContent();
-                checkAdmin();
-            } else {
-                alert("Lỗi: Không tìm thấy file data.js");
-            }
-        };
-    </script>
+/* ---------- SEARCH VIEW ---------- */
+function renderSearch(){
+  const q = state.query.trim().toLowerCase();
+  const items = q ? PRODUCTS.filter(p=> p.title.toLowerCase().includes(q) || p.tag.toLowerCase().includes(q) || p.language.toLowerCase().includes(q)) : [];
+  let html = `
+  <section class="section">
+    <a class="back-link" href="#" onclick="goHome();return false;">← Trang chủ</a>
+    <div class="section-head"><h2>Kết quả cho "${state.query}"</h2></div>
+    ${!q ? `<div class="empty-state"><div class="em">🔍</div>Nhập từ khóa để tìm kiếm.</div>` :
+      items.length ? `<div class="grid">${items.map(cardHTML).join('')}</div>` :
+      `<div class="empty-state"><div class="em">😕</div>Không tìm thấy sản phẩm phù hợp.</div>`}
+  </section>`;
+  document.getElementById('app').innerHTML = html;
+}
+
+function render(){
+  if(state.view==='home') renderHome();
+  else if(state.view==='category') renderCategory();
+  else if(state.view==='search') renderSearch();
+}
+function goHome(){ state={view:'home',category:'all',query:''}; closeSearch(); window.scrollTo({top:0,behavior:'smooth'}); render(); }
+
+/* ---------- MODAL ---------- */
+function openModal(id){
+  const p = PRODUCTS.find(x=>x.id===id);
+  if(!p) return;
+  const cls = CAT_CLASS[p.category];
+  const isPaid = p.price>0;
+  document.getElementById('modalBox').innerHTML = `
+    <div class="modal-thumb ${cls}">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <span style="font-size:64px;">${p.icon}</span>
+    </div>
+    <div class="modal-body">
+      <span class="modal-badge" style="background:${isPaid?'var(--paid)':'var(--free)'}">${p.tag}</span>
+      <div class="modal-title">${p.title}</div>
+      <div class="modal-stats">${stars(p.rating)}${dlIcon(effectiveDownloads(p))}</div>
+      <div class="modal-desc">${p.description}</div>
+      <div class="modal-meta-row"><span>Ngôn ngữ / Công nghệ</span><span>${p.language}</span></div>
+      <div class="modal-meta-row"><span>Danh mục</span><span>${CAT_LABEL[p.category]}</span></div>
+      <div class="modal-meta-row"><span>Giá</span><span>${fmtPrice(p)}</span></div>
+      <div class="modal-actions">
+        ${p.demoUrl ? `<button class="btn btn-secondary" onclick="window.open('${p.demoUrl}','_blank')">Xem Demo</button>` : ''}
+        ${isPaid
+          ? `<button class="btn btn-primary" onclick="contactBuy(${p.id})">💬 Liên Hệ Mua</button>`
+          : `<button class="btn btn-primary" onclick="downloadProduct(${p.id})">⬇ Tải Xuống</button>`}
+      </div>
+    </div>`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal(){ document.getElementById('modalOverlay').classList.remove('open'); }
+
+function downloadProduct(id){
+  const p = PRODUCTS.find(x=>x.id===id);
+  if(!p) return;
+  bumpDownload(id);
+  if(p.downloadUrl){
+    window.open(p.downloadUrl,'_blank');
+  } else {
+    const content = `${p.title}\n\nĐây là gói mô phỏng cho môi trường demo.\nQuản trị viên hãy cập nhật link tải thật (downloadUrl) trong trang quản trị /admin.\n\nNgôn ngữ: ${p.language}\nDanh mục: ${CAT_LABEL[p.category]}\n`;
+    const blob = new Blob([content], {type:'text/plain'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = p.title.replace(/[^a-z0-9]+/gi,'_').slice(0,60) + '.txt';
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+  showToast('Đã bắt đầu tải xuống ✓');
+  render(); // refresh counts on visible cards
+}
+function contactBuy(id){
+  const p = PRODUCTS.find(x=>x.id===id);
+  if(!p) return;
+  if(p.contact){
+    window.open(p.contact,'_blank');
+  } else {
+    window.location.href = `mailto:sales@codehub.vn?subject=Mua source: ${encodeURIComponent(p.title)}`;
+  }
+  showToast('Đang mở kênh liên hệ...');
+}
+
+/* ---------- SEARCH BAR ---------- */
+const searchBar = document.getElementById('searchBar');
+document.getElementById('searchToggle').onclick = ()=>{
+  searchBar.classList.toggle('open');
+  if(searchBar.classList.contains('open')) document.getElementById('searchInput').focus();
+};
+document.getElementById('searchClose').onclick = closeSearch;
+function closeSearch(){ searchBar.classList.remove('open'); document.getElementById('searchInput').value=''; }
+document.getElementById('searchInput').addEventListener('input', e=>{
+  state = { view:'search', category:'all', query:e.target.value };
+  render();
+});
+document.getElementById('searchInput').addEventListener('keydown', e=>{ if(e.key==='Escape') closeSearch(); });
+
+/* ---------- DRAWER ---------- */
+const drawer = document.getElementById('drawer'), drawerOverlay = document.getElementById('drawerOverlay');
+document.getElementById('menuToggle').onclick = ()=>{ drawer.classList.add('open'); drawerOverlay.classList.add('open'); };
+document.getElementById('drawerClose').onclick = closeDrawer;
+drawerOverlay.onclick = closeDrawer;
+function closeDrawer(){ drawer.classList.remove('open'); drawerOverlay.classList.remove('open'); }
+
+/* ---------- MODAL close handlers ---------- */
+document.getElementById('modalOverlay').addEventListener('click', e=>{ if(e.target.id==='modalOverlay') closeModal(); });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeModal(); closeDrawer(); } });
+
+/* ---------- Scroll to top ---------- */
+const toTop = document.getElementById('toTop');
+window.addEventListener('scroll', ()=>{ toTop.classList.toggle('show', window.scrollY>400); });
+toTop.onclick = ()=> window.scrollTo({top:0,behavior:'smooth'});
+
+/* ---------- Toast ---------- */
+let toastTimer;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+/* ---------- Hero swipe (touch) ---------- */
+(function(){
+  let startX=null;
+  document.addEventListener('touchstart', e=>{
+    if(e.target.closest('#hero')) startX = e.touches[0].clientX;
+  }, {passive:true});
+  document.addEventListener('touchend', e=>{
+    if(startX===null) return;
+    const dx = e.changedTouches[0].clientX - startX;
+    if(Math.abs(dx)>40) heroMove(dx>0?-1:1);
+    startX=null;
+  });
+})();
+
+/* ---------- init ---------- */
+render();
+</script>
 </body>
 </html>
